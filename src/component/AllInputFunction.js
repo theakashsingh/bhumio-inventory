@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { filterData, importData } from "../redux/inventorySlice";
 import { uuid_generator } from "../helperFunctions/uuidGenerator";
+import { Button, FilledInput, TextField } from "@mui/material";
 
 function AllInputFunction() {
   const [csvData, setCSVData] = useState([]);
-  const [searchStr, setSearchStr] = useState("")
+  const [searchStr, setSearchStr] = useState("");
   const dispatch = useDispatch();
-
 
   // convert csv file to json
   const parseCSVFile = (csv) => {
@@ -28,6 +28,14 @@ function AllInputFunction() {
     return JSON.stringify(result);
   };
 
+  function removeColumnFromArray(array, column) {
+    for (let i = 0; i < array.length; i++) {
+      if (array[i].hasOwnProperty(column)) {
+        delete array[i][column];
+      }
+    }
+    return array;
+  }
   //   convert file to readable formate
   const handleSelectFile = (e) => {
     let file = e.target.files[0];
@@ -36,14 +44,15 @@ function AllInputFunction() {
       let csvData = e.target.result;
       console.log({ csvData });
       let jsonData = parseCSVFile(csvData);
-      const finalData = JSON.parse(jsonData)
-      const addKeyInData = finalData.map((item)=>{
-            return {
-                ...item,
-                key:uuid_generator()
-            }
-      })
-      setCSVData(addKeyInData);
+      const finalData = JSON.parse(jsonData);
+      const addKeyInData = finalData.map((item) => {
+        return {
+          ...item,
+          key: uuid_generator(),
+        };
+      });
+      const afterRemovedEmptyObject = removeColumnFromArray(addKeyInData,"\r")
+      setCSVData(afterRemovedEmptyObject);
     };
     reader.readAsText(file);
   };
@@ -53,23 +62,41 @@ function AllInputFunction() {
     dispatch(importData(csvData));
   };
 
-  const handleSearchString = (e) =>{
-      const strValue = e.target.value
-      setSearchStr(strValue)
-  }
+  const handleSearchString = (e) => {
+    const strValue = e.target.value;
+    setSearchStr(strValue);
+  };
 
-  const handleFilterData = (e) =>{
-     e.preventDefault()
-     dispatch(filterData(searchStr))
-  }
+  const handleFilterData = (e) => {
+    e.preventDefault();
+    dispatch(filterData(searchStr));
+  };
 
   return (
     <div className="App">
-      
-      <input type="file" name="" id="" onChange={handleSelectFile} />
-      <button onClick={handleImportData}>import</button>
-      <input type="search" name="" id="" onChange={handleSearchString}/>
-      <button onClick={handleFilterData}>filter</button>
+      <TextField
+        id="standard-search"
+        label="CSV File"
+        type="file"
+        variant="standard"
+        onChange={handleSelectFile}
+      />
+
+      <Button variant="contained" onClick={handleImportData}>
+        Import
+      </Button>
+
+      <TextField
+        id="standard-search"
+        label="Search field"
+        type="search"
+        variant="standard"
+        onChange={handleSearchString}
+      />
+
+      <Button variant="outlined" onClick={handleFilterData}>
+        Filter
+      </Button>
     </div>
   );
 }
