@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import "./AllInputFunction.css";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { filterData, importData } from "../redux/inventorySlice";
 import { uuid_generator } from "../helperFunctions/uuidGenerator";
-import { Button, FilledInput, TextField } from "@mui/material";
+import { Button, TextField } from "@mui/material";
 
 function AllInputFunction() {
   const [csvData, setCSVData] = useState([]);
@@ -28,6 +29,7 @@ function AllInputFunction() {
     return JSON.stringify(result);
   };
 
+  // give column name to remove that column from array of object
   function removeColumnFromArray(array, column) {
     for (let i = 0; i < array.length; i++) {
       if (array[i].hasOwnProperty(column)) {
@@ -36,6 +38,8 @@ function AllInputFunction() {
     }
     return array;
   }
+
+
   //   convert file to readable formate
   const handleSelectFile = (e) => {
     let file = e.target.files[0];
@@ -51,52 +55,60 @@ function AllInputFunction() {
           key: uuid_generator(),
         };
       });
-      const afterRemovedEmptyObject = removeColumnFromArray(addKeyInData,"\r")
+      const afterRemovedEmptyObject = removeColumnFromArray(addKeyInData, "\r");
+      console.log(afterRemovedEmptyObject.pop());
       setCSVData(afterRemovedEmptyObject);
     };
     reader.readAsText(file);
   };
 
+  // dispatch csv data in redux 
   const handleImportData = (e) => {
     e.preventDefault();
     dispatch(importData(csvData));
   };
 
+  // set search string in state
   const handleSearchString = (e) => {
     const strValue = e.target.value;
     setSearchStr(strValue);
   };
 
+  // dispatch search string to redux
   const handleFilterData = (e) => {
     e.preventDefault();
     dispatch(filterData(searchStr));
   };
 
   return (
-    <div className="App">
-      <TextField
-        id="standard-search"
-        label="CSV File"
-        type="file"
-        variant="standard"
-        onChange={handleSelectFile}
-      />
+    <div className="input_functions_outer">
+      <div className="import_csv_file">
+        <TextField
+          id="standard-search"
+          label="CSV File"
+          type="file"
+          variant="standard"
+          onChange={handleSelectFile}
+        />
 
-      <Button variant="contained" onClick={handleImportData}>
-        Import
-      </Button>
+        <Button variant="contained" onClick={handleImportData}>
+          Import
+        </Button>
+      </div>
 
-      <TextField
-        id="standard-search"
-        label="Search field"
-        type="search"
-        variant="standard"
-        onChange={handleSearchString}
-      />
+      <div className="filter_data">
+        <TextField
+          id="standard-search"
+          label="Search field"
+          type="search"
+          variant="standard"
+          onChange={handleSearchString}
+        />
 
-      <Button variant="outlined" onClick={handleFilterData}>
-        Filter
-      </Button>
+        <Button variant="outlined" onClick={handleFilterData}>
+          Filter
+        </Button>
+      </div>
     </div>
   );
 }

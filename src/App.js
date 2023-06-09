@@ -11,7 +11,8 @@ import DialogBox from "./component/DialogBox";
 function App() {
  
   return (
-    <div className="App">
+    <div className="app">
+      <h1>Bhumio Inventory</h1>
       <AllInputFunction/>
       <DialogBox/>
       <InventoryTable/>
